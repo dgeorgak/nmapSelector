@@ -21,7 +21,9 @@ case $mode in
     nmap -p- -A $rhost --reason --script "default,vuln,auth,safe" -oA $(echo $rhost)
     ;;
   sequencial)
-    nmap $rhost
+    # ports=$(nmap -p- --min-rate=1000 -T4 $rhost | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)  
+    ports=$(nmap $rhost | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)
+    nmap $rhost -p$ports -A
     ;;
   *)
     echo "Invalid mode: $mode"
