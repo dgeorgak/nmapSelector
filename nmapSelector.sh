@@ -18,12 +18,15 @@ rhost=$1
 
 case $mode in
   thorough)
-    nmap -p- -A $rhost --reason --script "default,vuln,auth,safe" -oA $(echo $rhost)
+    ports=$(nmap -Pn -p- $rhost | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)  
+    nmap -p$ports -A $rhost --reason --script "default,vuln,auth,safe" -oA $(echo $rhost)
     ;;
-  sequencial)
-    # ports=$(nmap -p- --min-rate=1000 -T4 $rhost | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)  
-    ports=$(nmap $rhost | grep ^[0-9] | cut -d '/' -f 1 | tr '\n' ',' | sed s/,$//)
-    nmap $rhost -p$ports -A
+  all-ports)
+    nmap -Pn -p- $rhost 
+    ;;
+  stealth)
+    # needs script to be run as sudo because of -sS and -f
+    nmap -p- -sS --open -Pn -n -f -T2 $rhost 
     ;;
   *)
     echo "Invalid mode: $mode"
